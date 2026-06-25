@@ -1,0 +1,4 @@
+# Sudo timeout configuration for user
+# This file is managed by the dotfiles setup system
+# Template: Defaults:USERNAME timestamp_timeout=TIMEOUT_VALUE
+Defaults:david timestamp_timeout=15

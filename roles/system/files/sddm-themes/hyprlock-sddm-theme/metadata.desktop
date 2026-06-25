@@ -1,0 +1,8 @@
+[SddmGreeterTheme]
+Name=Hyprlock Style
+Description=SDDM theme matching hyprlock design with Catppuccin Frappé colors
+Author=Claude
+Theme-Id=hyprlock-style
+Theme-API=2.0
+X-KitDependencies-pacman=qt5-quickcontrols2
+X-KitDependencies-dnf=qt5-qtquickcontrols2

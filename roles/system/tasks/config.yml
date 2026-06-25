@@ -1,0 +1,27 @@
+---
+- name: Copy sddm theme config
+  copy:
+    src: sddm.conf.d/theme.conf
+    dest: /etc/sddm.conf.d/theme.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart sddm
+
+- name: Copy hyprlock-sddm-theme
+  copy:
+    src: sddm-themes/hyprlock-sddm-theme/
+    dest: /usr/share/sddm/themes/hyprlock-sddm-theme/
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart sddm
+
+- name: Copy sudoers timeout rule
+  copy:
+    src: sudoers.d/david-timeout
+    dest: /etc/sudoers.d/david-timeout
+    owner: root
+    group: root
+    mode: '0440'
+    validate: visudo -cf %s
