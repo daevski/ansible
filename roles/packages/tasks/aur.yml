@@ -8,7 +8,7 @@
 - name: Clone paru from AUR
   git:
     repo: https://aur.archlinux.org/paru.git
-    dest: /tmp/paru-build
+    dest: /home/{{ ansible_user }}/.cache/paru-build
   when: paru_check.rc != 0
   become: yes
   become_user: "{{ ansible_user }}"
@@ -16,14 +16,21 @@
 - name: Build and install paru
   command: makepkg -si --noconfirm
   args:
-    chdir: /tmp/paru-build
+    chdir: /home/{{ ansible_user }}/.cache/paru-build
   when: paru_check.rc != 0
   become: yes
   become_user: "{{ ansible_user }}"
 
-- name: Install AUR packages
-  shell: pacman -Qi {{ item }} > /dev/null 2>&1 || paru -S --noconfirm {{ item }}
+- name: Check AUR package installed
+  command: pacman -Qi {{ item }}
   loop: "{{ aur_packages }}"
+  register: aur_check
+  failed_when: false
+  changed_when: false
+
+- name: Install AUR packages
+  command: paru -S --noconfirm {{ item.item }}
+  loop: "{{ aur_check.results }}"
+  when: item.rc != 0
   become: yes
   become_user: "{{ ansible_user }}"
-  changed_when: false
