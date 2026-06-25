@@ -1,1 +1,16 @@
 ---
+- name: Clone dotfiles as bare repo
+  git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "/home/{{ ansible_user }}/.dotfiles-git"
+    bare: yes
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Checkout dotfiles into home
+  command: >
+    git --git-dir=/home/{{ ansible_user }}/.dotfiles-git
+        --work-tree=/home/{{ ansible_user }}
+        checkout -f
+  become: yes
+  become_user: "{{ ansible_user }}"
