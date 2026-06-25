@@ -1,0 +1,31 @@
+---
+- name: Enable and start system services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  loop:
+    - bluetooth
+    - docker
+    - NetworkManager
+    - nordvpnd
+    - sddm
+
+- name: Enable and start user services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    scope: user
+  loop:
+    - dropbox
+    - hypridle
+    - pipewire
+    - pipewire-pulse
+    - syncthing
+    - wireplumber
+  become: yes
+  become_user: "{{ ansible_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid }}"
