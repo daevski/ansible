@@ -1,0 +1,29 @@
+---
+- name: Check if paru is installed
+  command: pacman -Qi paru
+  register: paru_check
+  failed_when: false
+  changed_when: false
+
+- name: Clone paru from AUR
+  git:
+    repo: https://aur.archlinux.org/paru.git
+    dest: /tmp/paru-build
+  when: paru_check.rc != 0
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Build and install paru
+  command: makepkg -si --noconfirm
+  args:
+    chdir: /tmp/paru-build
+  when: paru_check.rc != 0
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Install AUR packages
+  shell: pacman -Qi {{ item }} > /dev/null 2>&1 || paru -S --noconfirm {{ item }}
+  loop: "{{ aur_packages }}"
+  become: yes
+  become_user: "{{ ansible_user }}"
+  changed_when: false
