@@ -1,0 +1,3 @@
+ansible_user: david
+user_uid: 1000
+dotfiles_repo: git@github.com:daevski/dotfiles.git
