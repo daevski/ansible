@@ -3,7 +3,6 @@ pacman_packages:
   - alacritty
   - alsa-utils
   - audacity
-  - base
   - base-devel
   - bind
   - bluez
@@ -30,19 +29,13 @@ pacman_packages:
   - kdiff3
   - less
   - lib32-libpulse
-  - lib32-nvidia-utils
-  - linux
   - linux-firmware
-  - linux-headers
   - mako
   - networkmanager
   - nfs-utils
   - niri
   - nodejs
   - npm
-  - nvidia-open
-  - nvidia-settings
-  - nvidia-utils
   - obsidian
   - openssh
   - pacman-contrib
@@ -77,6 +70,5 @@ pacman_packages:
 aur_packages:
   - google-chrome
   - nordvpn-bin
-  - rtl8821au-dkms-git
   - synology-drive
   - visual-studio-code-bin

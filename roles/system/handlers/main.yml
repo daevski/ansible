@@ -3,3 +3,6 @@
   systemd:
     name: sddm
     state: restarted
+
+- name: generate locale
+  command: locale-gen

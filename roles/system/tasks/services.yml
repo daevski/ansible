@@ -19,7 +19,6 @@
     state: started
     scope: user
   loop:
-    - dropbox
     - hypridle
     - pipewire
     - pipewire-pulse

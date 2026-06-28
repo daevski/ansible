@@ -1,4 +1,12 @@
 ---
+- name: Create sddm.conf.d directory
+  file:
+    path: /etc/sddm.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Copy sddm theme config
   copy:
     src: sddm.conf.d/theme.conf
@@ -25,3 +33,38 @@
     group: root
     mode: '0440'
     validate: visudo -cf %s
+
+- name: Enable locale in locale.gen
+  lineinfile:
+    path: /etc/locale.gen
+    regexp: "^#?{{ system_locale }}"
+    line: "{{ system_locale }} UTF-8"
+  notify: generate locale
+
+- name: Set system locale
+  copy:
+    content: "LANG={{ system_locale }}\n"
+    dest: /etc/locale.conf
+
+- name: Set timezone
+  timezone:
+    name: "{{ system_timezone }}"
+
+- name: Set hostname
+  hostname:
+    name: "{{ system_hostname }}"
+  when: system_hostname | length > 0
+
+- name: Update /etc/hosts with hostname
+  lineinfile:
+    path: /etc/hosts
+    regexp: "^127\\.0\\.1\\.1"
+    line: "127.0.1.1 {{ system_hostname }}"
+    state: present
+  when: system_hostname | length > 0
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes

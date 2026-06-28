@@ -6,8 +6,7 @@ Post-install provisioning for Arch Linux. Assumes base system installed with a `
 
 1. Install Ansible: `sudo pacman -S ansible`
 2. Install the community.general collection: `ansible-galaxy collection install community.general`
-3. Add your SSH key to GitHub (required for dotfiles clone)
-4. Verify `dotfiles_repo` in `group_vars/all.yml` points to your dotfiles remote
+3. Set `system_hostname`, `system_locale`, and `system_timezone` in `group_vars/all.yml` as needed
 
 ## Usage
 
@@ -30,7 +29,6 @@ ansible-playbook -i inventory/hosts site.yml --tags dotfiles
 These require interactive authentication and cannot be automated:
 
 - **NordVPN**: `nordvpn login`
-- **Dropbox**: launch Dropbox and complete browser authentication
 - **Syncthing**: open <http://localhost:8384> and pair with existing devices
 - **SSH keys**: `ssh-keygen -t ed25519 -C "hostname"` then add public key to GitHub
 

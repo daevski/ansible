@@ -23,7 +23,7 @@
 
 - name: Check AUR package installed
   command: pacman -Qi {{ item }}
-  loop: "{{ aur_packages }}"
+  loop: "{{ aur_packages + machine_specific_aur_packages }}"
   register: aur_check
   failed_when: false
   changed_when: false

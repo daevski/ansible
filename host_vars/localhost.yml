@@ -1,0 +1,10 @@
+---
+machine_specific_pacman_packages:
+  - lib32-nvidia-utils
+  - linux-headers
+  - nvidia-open
+  - nvidia-settings
+  - nvidia-utils
+
+machine_specific_aur_packages:
+  - rtl8821au-dkms-git
