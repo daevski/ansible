@@ -9,10 +9,10 @@
     path: /etc/pacman.conf
     marker: "# {mark} ARCH LINUX REPOS"
     block: |
-      [extra]
-      Include = /etc/pacman.d/mirrorlist-arch
+      [lib32]
+      Include = /etc/pacman.d/mirrorlist
 
-      [multilib]
+      [extra]
       Include = /etc/pacman.d/mirrorlist-arch
 
 - name: Import Arch Linux GPG keys
