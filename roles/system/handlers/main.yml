@@ -6,3 +6,4 @@
 
 - name: generate locale
   command: locale-gen
+  check_mode: no
