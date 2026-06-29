@@ -5,6 +5,8 @@
   check_mode: no
 
 - name: Install official packages
-  community.general.pacman:
-    name: "{{ pacman_packages + machine_specific_pacman_packages }}"
-    state: present
+  command: >-
+    pacman -S --needed --noconfirm
+    {{ (pacman_packages + machine_specific_pacman_packages) | join(' ') }}
+  register: pacman_result
+  changed_when: "'installing' in pacman_result.stdout or 'upgrading' in pacman_result.stdout"
