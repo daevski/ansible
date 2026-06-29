@@ -1,5 +1,5 @@
 ---
-- name: Enable and start system services
+- name: Enable and start system services (systemd)
   service:
     name: "{{ item }}"
     enabled: yes
@@ -10,6 +10,20 @@
     - NetworkManager
     - nordvpnd
     - sddm
+  when: ansible_facts['service_mgr'] == 'systemd'
+
+- name: Enable and start system services (OpenRC)
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop:
+    - bluetoothd
+    - docker
+    - NetworkManager
+    - nordvpnd
+    - sddm
+  when: ansible_facts['service_mgr'] == 'openrc'
 
 - name: Enable and start user services
   systemd:

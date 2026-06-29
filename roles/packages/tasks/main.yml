@@ -14,6 +14,9 @@
   register: artix_release
   check_mode: no
 
+- include_tasks: artix-packages.yml
+  when: artix_release.stat.exists
+
 - include_tasks: artix-arch-repos.yml
   when: artix_release.stat.exists
 
