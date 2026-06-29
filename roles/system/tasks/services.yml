@@ -10,6 +10,7 @@
     - NetworkManager
     - nordvpnd
     - sddm
+    - sshd
   when: ansible_facts['service_mgr'] == 'systemd'
 
 - name: Enable and start system services (OpenRC)
@@ -22,6 +23,7 @@
     - docker
     - NetworkManager
     - sddm
+    - sshd
   when: ansible_facts['service_mgr'] == 'openrc'
 
 - name: Enable and start user services
