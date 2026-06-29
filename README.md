@@ -4,9 +4,11 @@ Post-install provisioning for Arch Linux. Assumes base system installed with a `
 
 ## Prerequisites
 
-1. Install Ansible: `sudo pacman -S ansible`
-2. Install the community.general collection: `ansible-galaxy collection install community.general`
-3. Set `system_hostname`, `system_locale`, and `system_timezone` in `group_vars/all.yml` as needed
+Clone this repo, then run the bootstrap script. It installs Ansible, the required collection, and prompts for hostname, locale, and timezone:
+
+```bash
+./bootstrap.sh
+```
 
 ## Usage
 
