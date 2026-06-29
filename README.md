@@ -4,10 +4,10 @@ Post-install provisioning for Arch Linux. Assumes base system installed with a `
 
 ## Prerequisites
 
-Clone this repo, then run the bootstrap script. It installs Ansible, the required collection, and prompts for hostname, locale, and timezone:
+On a fresh install, run the bootstrap script directly. It installs Ansible, Git, pipx, clones this repo, and prompts for hostname, locale, and timezone:
 
 ```bash
-./bootstrap.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/daevski/ansible/main/bootstrap.sh)
 ```
 
 ## Usage

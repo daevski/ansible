@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")"
+REPO_URL="https://github.com/daevski/ansible.git"
+REPO_DIR="$HOME/code/daevski/ansible"
 
 echo "==> Installing Ansible, Git, and pipx..."
 sudo pacman -Sy --needed --noconfirm ansible-core git python-pipx vim
+
+echo "==> Cloning ansible repo..."
+if [[ ! -d "$REPO_DIR" ]]; then
+    git clone "$REPO_URL" "$REPO_DIR"
+fi
+cd "$REPO_DIR"
 
 echo "==> Installing community.general collection..."
 ansible-galaxy collection install community.general
@@ -16,18 +23,18 @@ pipx completions
 echo ""
 echo "==> System configuration"
 
-read -rp "Hostname: " system_hostname
+read -rp "Hostname: " system_hostname </dev/tty
 while [[ -z "$system_hostname" ]]; do
     echo "Hostname cannot be empty."
-    read -rp "Hostname: " system_hostname
+    read -rp "Hostname: " system_hostname </dev/tty
 done
 
 detected_locale=$(localectl status 2>/dev/null | awk '/System Locale/ {split($3,a,"="); print a[2]}')
-read -rp "Locale [${detected_locale:-en_US.UTF-8}]: " system_locale
+read -rp "Locale [${detected_locale:-en_US.UTF-8}]: " system_locale </dev/tty
 system_locale="${system_locale:-${detected_locale:-en_US.UTF-8}}"
 
 detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
-read -rp "Timezone [${detected_tz}]: " system_timezone
+read -rp "Timezone [${detected_tz}]: " system_timezone </dev/tty
 system_timezone="${system_timezone:-${detected_tz}}"
 
 echo "" >> host_vars/localhost.yml
@@ -42,6 +49,7 @@ echo "    locale:   ${system_locale}"
 echo "    timezone: ${system_timezone}"
 echo ""
 echo "==> Ready. Run the playbook with:"
+echo "    cd ${REPO_DIR}"
 echo "    ansible-playbook -i inventory/hosts site.yml --ask-become-pass"
 echo ""
 
