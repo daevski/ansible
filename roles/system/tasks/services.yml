@@ -1,10 +1,9 @@
 ---
 - name: Enable and start system services
-  systemd:
+  service:
     name: "{{ item }}"
     enabled: yes
     state: started
-    daemon_reload: yes
   loop:
     - bluetooth
     - docker

@@ -51,8 +51,12 @@
     name: "{{ system_timezone }}"
 
 - name: Set hostname
-  hostname:
-    name: "{{ system_hostname }}"
+  copy:
+    content: "{{ system_hostname }}\n"
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: '0644'
   when: system_hostname | length > 0
 
 - name: Update /etc/hosts with hostname
