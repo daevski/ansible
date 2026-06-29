@@ -8,9 +8,8 @@ echo "==> Installing Ansible, Git, and pipx..."
 sudo pacman -Sy --needed --noconfirm ansible-core git python-pipx vim
 
 echo "==> Cloning ansible repo..."
-if [[ ! -d "$REPO_DIR" ]]; then
-    git clone "$REPO_URL" "$REPO_DIR"
-fi
+rm -rf "$REPO_DIR"
+git clone "$REPO_URL" "$REPO_DIR"
 cd "$REPO_DIR"
 
 echo "==> Installing community.general collection..."
@@ -40,6 +39,7 @@ detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null) || true
 read -rp "Timezone (e.g. America/New_York) [${detected_tz:-UTC}]: " system_timezone </dev/tty
 system_timezone="${system_timezone:-${detected_tz:-UTC}}"
 
+sed -i '/^system_hostname:/d;/^system_locale:/d;/^system_timezone:/d' host_vars/localhost.yml
 echo "" >> host_vars/localhost.yml
 echo "system_hostname: \"${system_hostname}\"" >> host_vars/localhost.yml
 echo "system_locale: \"${system_locale}\"" >> host_vars/localhost.yml
