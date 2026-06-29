@@ -1,5 +1,12 @@
 ---
+- name: Check for Artix Linux
+  stat:
+    path: /etc/artix-release
+  register: artix_release
+  check_mode: no
+
 - include_tasks: artix-arch-repos.yml
-  when: "'Artix' in ansible_facts['distribution']"
+  when: artix_release.stat.exists
+
 - import_tasks: pacman.yml
 - import_tasks: aur.yml
