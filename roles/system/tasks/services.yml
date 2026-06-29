@@ -21,7 +21,6 @@
     - bluetoothd
     - docker
     - NetworkManager
-    - nordvpnd
     - sddm
   when: ansible_facts['service_mgr'] == 'openrc'
 
@@ -35,6 +34,7 @@
     - hypridle
     - pipewire
     - pipewire-pulse
+    - ssh-agent
     - syncthing
     - wireplumber
   become: yes

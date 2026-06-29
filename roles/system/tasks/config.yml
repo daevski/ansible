@@ -70,6 +70,29 @@
     state: present
   when: system_hostname | length > 0
 
+- name: Install ssh-agent systemd user service
+  copy:
+    src: systemd/user/ssh-agent.service
+    dest: /home/{{ ansible_user }}/.config/systemd/user/ssh-agent.service
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+  become_user: "{{ ansible_user }}"
+  when: ansible_facts['service_mgr'] == 'systemd'
+
+- name: Export SSH_AUTH_SOCK in .zshrc
+  lineinfile:
+    path: /home/{{ ansible_user }}/.zshrc
+    line: 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"'
+    regexp: 'SSH_AUTH_SOCK'
+    create: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+  become_user: "{{ ansible_user }}"
+
 - name: Check if docker group exists
   command: getent group docker
   register: docker_group
