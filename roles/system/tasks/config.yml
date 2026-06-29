@@ -67,8 +67,15 @@
     state: present
   when: system_hostname | length > 0
 
+- name: Check if docker group exists
+  command: getent group docker
+  register: docker_group
+  failed_when: false
+  changed_when: false
+
 - name: Add user to docker group
   user:
     name: "{{ ansible_user }}"
     groups: docker
     append: yes
+  when: docker_group.rc == 0
