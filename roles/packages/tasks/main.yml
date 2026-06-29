@@ -1,3 +1,5 @@
 ---
+- include_tasks: artix-arch-repos.yml
+  when: "'Artix' in ansible_facts['distribution']"
 - import_tasks: pacman.yml
 - import_tasks: aur.yml

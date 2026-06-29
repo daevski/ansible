@@ -1,0 +1,20 @@
+---
+- name: Install Arch Linux repo support package
+  command: pacman -S --needed --noconfirm artix-archlinux-support
+  register: arch_support_result
+  changed_when: "'installing' in arch_support_result.stdout"
+
+- name: Add Arch Linux repos to /etc/pacman.conf
+  blockinfile:
+    path: /etc/pacman.conf
+    marker: "# {mark} ARCH LINUX REPOS"
+    block: |
+      [extra]
+      Include = /etc/pacman.d/mirrorlist-arch
+
+      [multilib]
+      Include = /etc/pacman.d/mirrorlist-arch
+
+- name: Import Arch Linux GPG keys
+  command: pacman-key --populate archlinux
+  changed_when: false
