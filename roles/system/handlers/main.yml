@@ -1,6 +1,6 @@
 ---
 - name: restart sddm
-  systemd:
+  service:
     name: sddm
     state: restarted
 

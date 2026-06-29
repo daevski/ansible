@@ -27,3 +27,11 @@
   become_user: "{{ ansible_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ user_uid }}"
+  when: ansible_service_mgr == 'systemd'
+
+- name: User services require manual setup on non-systemd
+  debug:
+    msg: >
+      Skipping user services (pipewire, hypridle, wireplumber, syncthing) —
+      not supported on {{ ansible_service_mgr }}. Configure autostart manually.
+  when: ansible_service_mgr != 'systemd'
