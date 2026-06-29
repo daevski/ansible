@@ -21,7 +21,10 @@ pipx ensurepath
 pipx completions
 
 echo ""
-echo "==> System configuration"
+echo "************************************************************"
+echo "*                   SYSTEM CONFIGURATION                   *"
+echo "************************************************************"
+echo ""
 
 read -rp "Hostname: " system_hostname </dev/tty
 while [[ -z "$system_hostname" ]]; do
@@ -29,13 +32,13 @@ while [[ -z "$system_hostname" ]]; do
     read -rp "Hostname: " system_hostname </dev/tty
 done
 
-detected_locale=$(localectl status 2>/dev/null | awk '/System Locale/ {split($3,a,"="); print a[2]}')
+detected_locale=$(localectl status 2>/dev/null | awk '/System Locale/ {split($3,a,"="); print a[2]}') || true
 read -rp "Locale [${detected_locale:-en_US.UTF-8}]: " system_locale </dev/tty
 system_locale="${system_locale:-${detected_locale:-en_US.UTF-8}}"
 
-detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
-read -rp "Timezone [${detected_tz}]: " system_timezone </dev/tty
-system_timezone="${system_timezone:-${detected_tz}}"
+detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null) || true
+read -rp "Timezone [${detected_tz:-UTC}]: " system_timezone </dev/tty
+system_timezone="${system_timezone:-${detected_tz:-UTC}}"
 
 echo "" >> host_vars/localhost.yml
 echo "system_hostname: \"${system_hostname}\"" >> host_vars/localhost.yml
