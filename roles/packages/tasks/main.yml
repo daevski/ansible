@@ -19,3 +19,8 @@
 
 - import_tasks: pacman.yml
 - import_tasks: aur.yml
+
+- name: Remove temporary pacman NOPASSWD sudoers rule
+  file:
+    path: /etc/sudoers.d/ansible-pacman-nopasswd
+    state: absent
