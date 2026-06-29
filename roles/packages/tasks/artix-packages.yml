@@ -1,5 +1,5 @@
 ---
 - name: Install Artix OpenRC service init scripts
-  command: pacman -S --needed --noconfirm bluez-openrc docker-openrc networkmanager-openrc sddm-openrc
+  command: pacman -S --needed --noconfirm bluez-openrc docker-openrc networkmanager-openrc openssh-openrc sddm-openrc
   register: openrc_packages_result
   changed_when: "'installing' in openrc_packages_result.stdout"
