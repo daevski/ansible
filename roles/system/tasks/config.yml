@@ -47,8 +47,11 @@
     dest: /etc/locale.conf
 
 - name: Set timezone
-  timezone:
-    name: "{{ system_timezone }}"
+  file:
+    src: "/usr/share/zoneinfo/{{ system_timezone }}"
+    dest: /etc/localtime
+    state: link
+    force: yes
 
 - name: Set hostname
   copy:
