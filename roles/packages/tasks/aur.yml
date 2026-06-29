@@ -18,7 +18,7 @@
   become_user: "{{ ansible_user }}"
 
 - name: Build paru
-  command: makepkg -s --noconfirm
+  command: makepkg -sf --noconfirm
   args:
     chdir: /home/{{ ansible_user }}/.cache/paru-build
   when: paru_check.rc != 0
