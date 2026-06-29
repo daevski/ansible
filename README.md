@@ -26,6 +26,12 @@ ansible-playbook -i inventory/hosts site.yml --tags system --ask-become-pass
 ansible-playbook -i inventory/hosts site.yml --tags dotfiles
 ```
 
+Dry run (the `community.general.pacman` module has a check-mode bug with repo packages, so skip the packages role):
+
+```bash
+ansible-playbook -i inventory/hosts site.yml --skip-tags packages --ask-become-pass --check
+```
+
 ## Manual Steps After Provisioning
 
 These require interactive authentication and cannot be automated:
