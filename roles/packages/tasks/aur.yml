@@ -5,6 +5,10 @@
   failed_when: false
   changed_when: false
 
+- name: Install paru build dependencies
+  command: pacman -S --needed --noconfirm rust
+  when: paru_check.rc != 0
+
 - name: Clone paru from AUR
   git:
     repo: https://aur.archlinux.org/paru.git
