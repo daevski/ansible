@@ -1,4 +1,13 @@
 ---
+- name: Allow pacman without password for AUR builds
+  copy:
+    content: "{{ ansible_user }} ALL=(ALL) NOPASSWD: /usr/bin/pacman\n"
+    dest: /etc/sudoers.d/ansible-pacman-nopasswd
+    owner: root
+    group: root
+    mode: '0440'
+    validate: visudo -cf %s
+
 - name: Check for Artix Linux
   stat:
     path: /etc/artix-release
