@@ -37,7 +37,7 @@ read -rp "Locale [${detected_locale:-en_US.UTF-8}]: " system_locale </dev/tty
 system_locale="${system_locale:-${detected_locale:-en_US.UTF-8}}"
 
 detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null) || true
-read -rp "Timezone [${detected_tz:-UTC}]: " system_timezone </dev/tty
+read -rp "Timezone (e.g. America/New_York) [${detected_tz:-UTC}]: " system_timezone </dev/tty
 system_timezone="${system_timezone:-${detected_tz:-UTC}}"
 
 echo "" >> host_vars/localhost.yml
