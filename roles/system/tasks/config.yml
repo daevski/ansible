@@ -106,3 +106,8 @@
     groups: docker
     append: yes
   when: docker_group.rc == 0
+
+- name: Set default shell to zsh
+  user:
+    name: "{{ ansible_user }}"
+    shell: /usr/bin/zsh
