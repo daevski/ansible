@@ -1,16 +1,36 @@
 ---
-- name: Clone dotfiles as bare repo
+- name: Clone dotfiles to temp location
   git:
     repo: "{{ dotfiles_repo }}"
-    dest: "/home/{{ ansible_user }}/.dotfiles-git"
-    bare: yes
+    dest: "/home/{{ ansible_user }}/.dotfiles-tmp"
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Copy .git from temp clone into home directory
+  shell: cp -r /home/{{ ansible_user }}/.dotfiles-tmp/.git /home/{{ ansible_user }}/.git
+  args:
+    creates: "/home/{{ ansible_user }}/.git"
   become: yes
   become_user: "{{ ansible_user }}"
 
 - name: Checkout dotfiles into home
-  command: >
-    git --git-dir=/home/{{ ansible_user }}/.dotfiles-git
-        --work-tree=/home/{{ ansible_user }}
-        checkout -f
+  command: git -C /home/{{ ansible_user }} checkout -f
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Set dotfiles remote to SSH
+  command: git -C /home/{{ ansible_user }} remote set-url origin git@daevski:daevski/dotfiles.git
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Set main branch to track origin/main
+  command: git -C /home/{{ ansible_user }} branch --set-upstream-to=origin/main main
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Remove temp dotfiles clone
+  file:
+    path: "/home/{{ ansible_user }}/.dotfiles-tmp"
+    state: absent
   become: yes
   become_user: "{{ ansible_user }}"
