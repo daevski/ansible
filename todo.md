@@ -24,8 +24,18 @@ the logic is well-defined.
 
 ### Hibernate
 `hibernate.sh` creates a swapfile, adds it to fstab, and writes the resume
-kernel parameter. Should live in a task file gated by a `hibernate_enabled`
-var (default false). Currently disabled everywhere but useful to have codified.
+kernel parameter. Already manually configured on the laptop (swapfile at
+`/swapfile`, fstab entry present, `resume=` and `resume_offset=` in
+`GRUB_CMDLINE_LINUX_DEFAULT`) — but not codified in Ansible. Should live in
+a task file gated by a `hibernate_enabled` var (default false) so it can be
+applied consistently on new machines.
+
+### Default shell (zsh) — post-provision re-login required
+The `config.yml` task sets zsh as the default shell via `chsh`, which is
+correct. However `chsh` only takes effect on next login, so a freshly
+provisioned machine will still show bash until the user logs out and back
+in. Consider adding a `debug` task at the end of the play reminding the
+user to re-login, or document it in the README.
 
 ## Package gaps (simple additions when the feature is needed)
 
