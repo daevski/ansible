@@ -1,3 +1,7 @@
 ---
 - import_tasks: config.yml
 - import_tasks: services.yml
+- import_tasks: fonts.yml
+  tags: fonts
+- import_tasks: wallpaper.yml
+  tags: wallpaper

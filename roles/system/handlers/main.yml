@@ -7,3 +7,25 @@
 - name: generate locale
   command: locale-gen
   check_mode: no
+
+- name: rebuild font cache
+  command: fc-cache -f
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: restart waybar
+  shell: "pkill waybar || true; nohup waybar > /dev/null 2>&1 &"
+  become: yes
+  become_user: "{{ ansible_user }}"
+  environment:
+    WAYLAND_DISPLAY: wayland-1
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ user_uid }}/bus"
+
+- name: apply wallpaper
+  shell: "pkill swaybg || true; nohup swaybg -i {{ wallpaper_dest }} -m fill > /dev/null 2>&1 &"
+  become: yes
+  become_user: "{{ ansible_user }}"
+  environment:
+    WAYLAND_DISPLAY: wayland-1
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid }}"

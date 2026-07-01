@@ -1,0 +1,18 @@
+---
+- name: Ensure system backgrounds directory exists
+  file:
+    path: /usr/share/backgrounds
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download wallpaper
+  get_url:
+    url: "{{ wallpaper_url }}"
+    dest: "{{ wallpaper_dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+    force: no
+  notify: apply wallpaper

@@ -1,0 +1,45 @@
+---
+- name: Ensure user fonts directory exists
+  file:
+    path: "/home/{{ ansible_user }}/.local/share/fonts"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Check installed font families
+  shell: "fc-list : family"
+  register: installed_fonts
+  changed_when: false
+
+- name: Download missing font archives
+  get_url:
+    url: "{{ item.url }}"
+    dest: "/tmp/{{ item.name }}.zip"
+  loop: "{{ user_fonts }}"
+  when: item.family not in installed_fonts.stdout
+  become: yes
+  become_user: "{{ ansible_user }}"
+  notify:
+    - rebuild font cache
+    - restart waybar
+
+- name: Extract missing fonts to user fonts directory
+  unarchive:
+    src: "/tmp/{{ item.name }}.zip"
+    dest: "/home/{{ ansible_user }}/.local/share/fonts/"
+    remote_src: yes
+  loop: "{{ user_fonts }}"
+  when: item.family not in installed_fonts.stdout
+  become: yes
+  become_user: "{{ ansible_user }}"
+  notify:
+    - rebuild font cache
+    - restart waybar
+
+- name: Clean up downloaded font archives
+  file:
+    path: "/tmp/{{ item.name }}.zip"
+    state: absent
+  loop: "{{ user_fonts }}"
+  when: item.family not in installed_fonts.stdout

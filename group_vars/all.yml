@@ -5,3 +5,17 @@ dotfiles_repo: https://github.com/raremonarch/dotfiles.git
 system_locale: en_US.UTF-8
 system_timezone: UTC
 system_hostname: ""
+
+user_fonts:
+  - name: audiolink-mono
+    family: AudioLink Mono
+    url: https://audiolink.dev/gallery/AudioLinkMono.zip
+  - name: bedstead
+    family: Bedstead
+    url: https://bjh21.me.uk/bedstead/bedstead-3.252.zip
+  - name: chivo
+    family: Chivo
+    url: https://www.omnibus-type.com/wp-content/uploads/Chivo.zip
+
+wallpaper_url: https://i.imgur.com/xeYkH88.jpeg
+wallpaper_dest: /usr/share/backgrounds/wallpaper.jpeg
