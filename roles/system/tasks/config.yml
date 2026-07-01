@@ -111,3 +111,19 @@
   user:
     name: "{{ ansible_user }}"
     shell: /usr/bin/zsh
+
+- name: Configure CopyQ clipboard-to-primary sync
+  community.general.ini_file:
+    path: /home/{{ ansible_user }}/.config/copyq/copyq.conf
+    section: Options
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+    create: yes
+  loop:
+    - { key: check_selection, value: 'true' }
+    - { key: copy_clipboard, value: 'true' }
+  become: yes
+  become_user: "{{ ansible_user }}"
