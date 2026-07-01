@@ -1,5 +1,5 @@
 ---
-- hosts: desktop
+- hosts: all
   become: yes
   roles:
     - role: packages

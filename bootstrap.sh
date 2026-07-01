@@ -39,14 +39,20 @@ detected_tz=$(timedatectl show --property=Timezone --value 2>/dev/null) || true
 read -rp "Timezone (e.g. America/New_York) [${detected_tz:-UTC}]: " system_timezone </dev/tty
 system_timezone="${system_timezone:-${detected_tz:-UTC}}"
 
-sed -i '/^system_hostname:/d;/^system_locale:/d;/^system_timezone:/d' host_vars/localhost.yml
-echo "" >> host_vars/localhost.yml
-echo "system_hostname: \"${system_hostname}\"" >> host_vars/localhost.yml
-echo "system_locale: \"${system_locale}\"" >> host_vars/localhost.yml
-echo "system_timezone: \"${system_timezone}\"" >> host_vars/localhost.yml
+host_vars_file="host_vars/${system_hostname}.yml"
+if [ ! -f "$host_vars_file" ]; then
+    echo "---" > "$host_vars_file"
+fi
+sed -i '/^system_hostname:/d;/^system_locale:/d;/^system_timezone:/d' "$host_vars_file"
+echo "" >> "$host_vars_file"
+echo "system_hostname: \"${system_hostname}\"" >> "$host_vars_file"
+echo "system_locale: \"${system_locale}\"" >> "$host_vars_file"
+echo "system_timezone: \"${system_timezone}\"" >> "$host_vars_file"
+
+sed -i "s/^.* ansible_connection=local$/${system_hostname} ansible_connection=local/" inventory/hosts
 
 echo ""
-echo "==> Configuration written to host_vars/localhost.yml"
+echo "==> Configuration written to ${host_vars_file}"
 echo "    hostname: ${system_hostname}"
 echo "    locale:   ${system_locale}"
 echo "    timezone: ${system_timezone}"

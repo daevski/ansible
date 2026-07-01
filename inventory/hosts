@@ -1,2 +1,2 @@
-[desktop]
-localhost ansible_connection=local
+[all]
+desktop ansible_connection=local
