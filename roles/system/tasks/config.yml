@@ -92,6 +92,18 @@
     mode: '0644'
   become: yes
   become_user: "{{ ansible_user }}"
+  when: ansible_facts['service_mgr'] == 'systemd'
+  tags: ssh_auth_sock
+
+- name: Remove systemd SSH_AUTH_SOCK from .zshrc on non-systemd systems
+  lineinfile:
+    path: /home/{{ ansible_user }}/.zshrc
+    regexp: 'SSH_AUTH_SOCK'
+    state: absent
+  become: yes
+  become_user: "{{ ansible_user }}"
+  when: ansible_facts['service_mgr'] != 'systemd'
+  tags: ssh_auth_sock
 
 - name: Check if docker group exists
   command: getent group docker
@@ -111,6 +123,7 @@
   user:
     name: "{{ ansible_user }}"
     shell: /usr/bin/zsh
+  tags: default_shell
 
 - name: Configure CopyQ clipboard-to-primary sync
   community.general.ini_file:
