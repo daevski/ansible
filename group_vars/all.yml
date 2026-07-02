@@ -1,4 +1,5 @@
 ansible_user: david
+has_backlight: false
 user_uid: 1000
 dotfiles_repo: https://github.com/raremonarch/dotfiles.git
 

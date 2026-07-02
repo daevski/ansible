@@ -1,2 +1,3 @@
 [all]
 desktop ansible_connection=local
+laptop ansible_connection=local

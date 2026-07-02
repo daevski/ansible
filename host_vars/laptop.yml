@@ -1,0 +1,5 @@
+---
+has_backlight: true
+
+machine_specific_pacman_packages: []
+machine_specific_aur_packages: []

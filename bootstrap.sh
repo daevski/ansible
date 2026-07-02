@@ -49,7 +49,9 @@ echo "system_hostname: \"${system_hostname}\"" >> "$host_vars_file"
 echo "system_locale: \"${system_locale}\"" >> "$host_vars_file"
 echo "system_timezone: \"${system_timezone}\"" >> "$host_vars_file"
 
-sed -i "s/^.* ansible_connection=local$/${system_hostname} ansible_connection=local/" inventory/hosts
+if ! grep -qxF "${system_hostname} ansible_connection=local" inventory/hosts; then
+    echo "${system_hostname} ansible_connection=local" >> inventory/hosts
+fi
 
 echo ""
 echo "==> Configuration written to ${host_vars_file}"

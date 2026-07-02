@@ -1,0 +1,11 @@
+---
+- name: Install brightnessctl
+  community.general.pacman:
+    name: brightnessctl
+    state: present
+
+- name: Add user to video group for backlight control
+  user:
+    name: "{{ ansible_user }}"
+    groups: video
+    append: yes
