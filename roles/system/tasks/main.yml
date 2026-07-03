@@ -6,5 +6,4 @@
 - import_tasks: wallpaper.yml
   tags: wallpaper
 - import_tasks: brightness.yml
-  when: has_backlight | default(false)
   tags: brightness

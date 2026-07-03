@@ -1,11 +1,57 @@
 ---
+- name: Detect backlight devices
+  find:
+    paths: /sys/class/backlight
+    file_type: directory
+    recurse: no
+  register: backlight_devices
+
 - name: Install brightnessctl
   community.general.pacman:
     name: brightnessctl
     state: present
+  when: backlight_devices.files | length > 0
 
 - name: Add user to video group for backlight control
   user:
     name: "{{ ansible_user }}"
     groups: video
     append: yes
+  when: backlight_devices.files | length > 0
+
+- name: Create backlight save directory
+  file:
+    path: /var/lib/backlight
+    state: directory
+    mode: '0755'
+  when: backlight_devices.files | length > 0
+
+- name: Install backlight restore script (runs at boot)
+  copy:
+    dest: /etc/local.d/backlight.start
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      for dev in /sys/class/backlight/*/; do
+          [ -d "$dev" ] || continue
+          name=$(basename "$dev")
+          save_file="/var/lib/backlight/$name"
+          if [ -f "$save_file" ]; then
+              cat "$save_file" > "${dev}brightness"
+          fi
+      done
+  when: backlight_devices.files | length > 0
+
+- name: Install backlight save script (runs at shutdown)
+  copy:
+    dest: /etc/local.d/backlight.stop
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      mkdir -p /var/lib/backlight
+      for dev in /sys/class/backlight/*/; do
+          [ -d "$dev" ] || continue
+          name=$(basename "$dev")
+          cat "${dev}brightness" > "/var/lib/backlight/$name"
+      done
+  when: backlight_devices.files | length > 0
