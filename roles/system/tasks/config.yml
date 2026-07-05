@@ -52,6 +52,7 @@
     dest: /etc/localtime
     state: link
     force: yes
+  tags: timezone
 
 - name: Set hostname
   copy:

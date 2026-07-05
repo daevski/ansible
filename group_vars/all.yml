@@ -3,7 +3,7 @@ user_uid: 1000
 dotfiles_repo: https://github.com/raremonarch/dotfiles.git
 
 system_locale: en_US.UTF-8
-system_timezone: UTC
+system_timezone: America/New_York
 system_hostname: ""
 
 user_fonts:
