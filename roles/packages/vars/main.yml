@@ -1,5 +1,7 @@
 ---
 pacman_packages:
+  - adobe-source-code-pro-fonts
+  - adwaita-fonts
   - alacritty
   - alsa-utils
   - audacity
