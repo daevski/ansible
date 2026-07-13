@@ -65,6 +65,7 @@ pacman_packages:
   - wget
   - wimlib
   - wireplumber
+  - xdg-desktop-portal-wlr
   - xwayland-satellite
   - zoxide
   - zsh
