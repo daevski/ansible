@@ -1,0 +1,12 @@
+#!/usr/bin/openrc-run
+
+supervisor=supervise-daemon
+command="/usr/bin/openvt"
+command_args="-c 2 -s -w -- /usr/bin/lemurs"
+
+depend() {
+    need localmount dbus elogind
+    after bootmisc consolefont modules netmount
+    after keymaps
+    provide xdm display-manager
+}

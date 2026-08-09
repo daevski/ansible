@@ -6,6 +6,7 @@
     owner: root
     group: root
     mode: '0755'
+  when: ansible_facts['service_mgr'] == 'systemd'
 
 - name: Copy sddm theme config
   copy:
@@ -15,6 +16,7 @@
     group: root
     mode: '0644'
   notify: restart sddm
+  when: ansible_facts['service_mgr'] == 'systemd'
 
 - name: Copy hyprlock-sddm-theme
   copy:
@@ -24,6 +26,34 @@
     group: root
     mode: '0644'
   notify: restart sddm
+  when: ansible_facts['service_mgr'] == 'systemd'
+
+- name: Deploy lemurs OpenRC init script
+  copy:
+    src: lemurs/lemurs
+    dest: /etc/init.d/lemurs
+    owner: root
+    group: root
+    mode: '0755'
+  when: ansible_facts['service_mgr'] == 'openrc'
+
+- name: Deploy lemurs config
+  copy:
+    src: lemurs/config.toml
+    dest: /etc/lemurs/config.toml
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_facts['service_mgr'] == 'openrc'
+
+- name: Deploy lemurs niri session desktop file
+  copy:
+    src: lemurs/wayland-sessions/niri.desktop
+    dest: /etc/lemurs/wayland-sessions/niri.desktop
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_facts['service_mgr'] == 'openrc'
 
 - name: Copy sudoers timeout rule
   copy:
