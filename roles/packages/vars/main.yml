@@ -53,7 +53,7 @@ pacman_packages:
   - slurp
   - steam
   - sudo
-  - swappy
+  - satty
   - swaybg
   - syncthing
   - thunar
