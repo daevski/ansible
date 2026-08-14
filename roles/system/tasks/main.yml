@@ -1,4 +1,6 @@
 ---
+- import_tasks: hermes-remote.yml
+  tags: hermes-remote
 - import_tasks: config.yml
 - import_tasks: services.yml
 - import_tasks: fonts.yml
