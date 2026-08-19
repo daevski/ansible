@@ -10,6 +10,19 @@
 # Requires: anthropic_personal_org_id set in group_vars/all.yml (or a host
 # override) -- the Anthropic org UUID that identifies David's personal
 # account, distinct from any enterprise/work org.
+#
+# Requires the FIRST account in hermes_host_accounts to already have
+# Hermes Agent installed (hermes CLI on its PATH). Hermes install itself
+# is an interactive/OAuth step and is NOT automated by this repo -- run
+# this playbook only after that manual step is done, not as part of bare
+# account provisioning (hermes-hosts.yml). This is why it's a separate
+# standalone playbook rather than folded into hermes-hosts.yml.
+#
+# `hermes cron create` is NOT idempotent -- re-running it creates a
+# duplicate job every time. The cron-registration task below guards
+# against that by checking ~/.hermes/cron/jobs.json for an existing job
+# named anthropic-org-watchdog before creating one, so this whole
+# playbook (including the cron step) is safe to re-run.
 
 - name: Assert anthropic_personal_org_id is defined
   assert:
@@ -36,6 +49,33 @@
     group: root
     mode: '0644'
 
+- name: Check whether the first Hermes account has Hermes Agent installed
+  become: yes
+  become_user: "{{ hermes_host_accounts[0] }}"
+  stat:
+    path: "/home/{{ hermes_host_accounts[0] }}/.local/bin/hermes"
+  register: hermes_cli_check
+
+- name: Skip cron registration if Hermes Agent isn't installed yet
+  debug:
+    msg: >-
+      /home/{{ hermes_host_accounts[0] }}/.local/bin/hermes not found --
+      Hermes Agent hasn't been interactively installed/logged in on this
+      account yet. Watchdog script + config are deployed, but the cron
+      job was NOT registered. Re-run this playbook after completing the
+      manual Hermes install/login for {{ hermes_host_accounts[0] }}.
+  when: not hermes_cli_check.stat.exists
+
+- name: Ensure per-account scripts dir exists and symlink the watchdog script in
+  file:
+    path: "/home/{{ item }}/.hermes/scripts"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop: "{{ hermes_host_accounts }}"
+  when: hermes_cli_check.stat.exists
+
 - name: Symlink watchdog script into each Hermes account's scripts dir
   file:
     src: /usr/local/bin/check_anthropic_org.sh
@@ -45,6 +85,26 @@
     owner: "{{ item }}"
     group: "{{ item }}"
   loop: "{{ hermes_host_accounts }}"
+  when: hermes_cli_check.stat.exists
+
+- name: Check whether the anthropic-org-watchdog cron job already exists
+  become: yes
+  become_user: "{{ hermes_host_accounts[0] }}"
+  ansible.builtin.slurp:
+    src: "/home/{{ hermes_host_accounts[0] }}/.hermes/cron/jobs.json"
+  register: existing_jobs_raw
+  when: hermes_cli_check.stat.exists
+  failed_when: false
+
+- name: Determine if anthropic-org-watchdog job is already registered
+  set_fact:
+    watchdog_job_exists: >-
+      {{
+        hermes_cli_check.stat.exists and
+        existing_jobs_raw is defined and
+        existing_jobs_raw.content is defined and
+        'anthropic-org-watchdog' in (existing_jobs_raw.content | b64decode)
+      }}
 
 - name: Register anthropic-org-watchdog cron job under first Hermes account
   become: yes
@@ -56,8 +116,8 @@
     --no-agent
     --script check_anthropic_org.sh
     --deliver origin
+  when:
+    - hermes_cli_check.stat.exists
+    - not watchdog_job_exists
   register: cron_create_result
-  changed_when: "'created' in cron_create_result.stdout | lower or 'Cron job' in cron_create_result.stdout"
-  failed_when: >
-    cron_create_result.rc != 0 and
-    'already exists' not in cron_create_result.stderr | default('') | lower
+  changed_when: "'Created job' in cron_create_result.stdout"
