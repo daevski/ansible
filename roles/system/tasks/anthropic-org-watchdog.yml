@@ -84,3 +84,9 @@
     enabled: yes
     state: started
     daemon_reload: yes
+  # Under --check, the template/copy tasks above are simulated only -- the
+  # unit files never actually land on disk -- so this would fail with
+  # "Could not find the requested service" on a fresh host even though a
+  # real (non-check) run works fine. Skip it in check mode; the deploy
+  # tasks above still report what they *would* change.
+  when: not ansible_check_mode
