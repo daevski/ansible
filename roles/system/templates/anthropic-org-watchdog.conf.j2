@@ -1,0 +1,8 @@
+# Ansible-managed. Do not edit directly if you want changes to persist
+# across playbook runs -- update anthropic_personal_org_id in
+# group_vars/all.yml (or a host_vars override) instead and re-run
+# anthropic-org-watchdog.yml.
+#
+# Emergency override (survives until next playbook run only):
+#   sudo tee /etc/anthropic-org-watchdog.conf <<< 'PERSONAL_ORG_ID=<new-uuid>'
+PERSONAL_ORG_ID={{ anthropic_personal_org_id }}

@@ -1,0 +1,63 @@
+---
+# Deploys the Anthropic-org watchdog to a host running one or more Hermes
+# Agent instances (accounts listed in hermes_host_accounts). Installs a
+# shared script + ansible-managed org-id config, then registers a
+# --no-agent Hermes cron job under the FIRST account in
+# hermes_host_accounts (it scans every /home/*/.hermes/.env it can read,
+# so one registered job covers every sibling instance on the box -- no
+# need to duplicate the cron job per account).
+#
+# Requires: anthropic_personal_org_id set in group_vars/all.yml (or a host
+# override) -- the Anthropic org UUID that identifies David's personal
+# account, distinct from any enterprise/work org.
+
+- name: Assert anthropic_personal_org_id is defined
+  assert:
+    that:
+      - anthropic_personal_org_id is defined
+      - anthropic_personal_org_id | length > 0
+    fail_msg: >-
+      anthropic_personal_org_id must be set (group_vars/all.yml or a host
+      override) before running anthropic-org-watchdog.yml.
+
+- name: Deploy shared org-id watchdog script
+  copy:
+    src: check_anthropic_org.sh
+    dest: /usr/local/bin/check_anthropic_org.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Template org-id watchdog config
+  template:
+    src: anthropic-org-watchdog.conf.j2
+    dest: /etc/anthropic-org-watchdog.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Symlink watchdog script into each Hermes account's scripts dir
+  file:
+    src: /usr/local/bin/check_anthropic_org.sh
+    dest: "/home/{{ item }}/.hermes/scripts/check_anthropic_org.sh"
+    state: link
+    force: yes
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ hermes_host_accounts }}"
+
+- name: Register anthropic-org-watchdog cron job under first Hermes account
+  become: yes
+  become_user: "{{ hermes_host_accounts[0] }}"
+  command: >
+    /home/{{ hermes_host_accounts[0] }}/.local/bin/hermes cron create
+    "every 5m"
+    --name anthropic-org-watchdog
+    --no-agent
+    --script check_anthropic_org.sh
+    --deliver origin
+  register: cron_create_result
+  changed_when: "'created' in cron_create_result.stdout | lower or 'Cron job' in cron_create_result.stdout"
+  failed_when: >
+    cron_create_result.rc != 0 and
+    'already exists' not in cron_create_result.stderr | default('') | lower

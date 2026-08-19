@@ -21,3 +21,8 @@ wallpaper_url: https://i.imgur.com/xeYkH88.jpeg
 wallpaper_dest: /usr/share/backgrounds/wallpaper.jpeg
 
 ssh_service_name: sshd
+
+# Anthropic org identity used by the anthropic-org-watchdog role/playbook
+# -- the org UUID for David personal Anthropic account (never his work/
+# enterprise org). Confirmed via API on 2026-08-19.
+anthropic_personal_org_id: bae1c311-80bb-43a6-880a-d0bd168203b3

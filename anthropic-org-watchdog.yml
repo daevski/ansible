@@ -1,0 +1,21 @@
+---
+# Standalone playbook to provision the Anthropic-org watchdog on any host
+# running one or more Hermes Agent instances. Deploys a shared scanning
+# script + org-id config, then registers a per-account Hermes cron job
+# (--no-agent, every 5m) for each account in hermes_host_accounts on the
+# target host.
+#
+# The watchdog itself scans EVERY /home/*/.hermes/.env it can read (direct
+# read or passwordless sudo -u <user>) on the box it runs from, so even a
+# single registered cron job (e.g. under hermes-1) reports on all sibling
+# accounts (hermes-2, etc) it has access to -- not just its own.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts anthropic-org-watchdog.yml --limit bigbox
+- hosts: "{{ target | default('all') }}"
+  become: yes
+  tasks:
+    - import_tasks: roles/system/tasks/anthropic-org-watchdog.yml
+      tags: anthropic-org-watchdog
+  handlers:
+    - import_tasks: roles/system/handlers/main.yml
