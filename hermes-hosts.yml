@@ -2,8 +2,13 @@
 # Standalone playbook to provision the hermes-1/hermes-2 login accounts
 # that will each host an independent Hermes Agent instance on a target
 # host (e.g. bigbox), plus the anthropic-org-watchdog systemd timer that
-# monitors them. Imports both task files + handlers directly so it runs
-# in isolation without pulling in the rest of the system role.
+# monitors them.
+#
+# Uses import_role + tasks_from to run only these two task files from the
+# `system` role (not the whole role's packages/dotfiles/fonts/etc), while
+# still getting real role-context path inheritance for templates/files/
+# handlers -- unlike import_tasks, which does NOT grant that inheritance
+# and requires brittle explicit paths for any template/copy source.
 #
 # The watchdog step is safe to run before Hermes Agent itself is
 # installed/logged in on the target accounts (that's a manual OAuth step,
@@ -18,9 +23,11 @@
 - hosts: "{{ target | default('all') }}"
   become: yes
   tasks:
-    - import_tasks: roles/system/tasks/hermes-hosts.yml
+    - import_role:
+        name: system
+        tasks_from: hermes-hosts
       tags: hermes-hosts
-    - import_tasks: roles/system/tasks/anthropic-org-watchdog.yml
+    - import_role:
+        name: system
+        tasks_from: anthropic-org-watchdog
       tags: anthropic-org-watchdog
-  handlers:
-    - import_tasks: roles/system/handlers/main.yml

@@ -5,6 +5,10 @@
 # (new org id, new interval, etc) on a host that's already provisioned --
 # on a fresh host, prefer hermes-hosts.yml which does both in one run.
 #
+# Uses import_role + tasks_from (not import_tasks) so template/file
+# sources resolve via normal role-context inheritance instead of needing
+# hardcoded paths.
+#
 # Deploys a root systemd service + timer (NOT a Hermes cron job) that
 # scans every /home/*/.hermes/.env it can read and alerts via `hermes
 # send` on any Anthropic org mismatch. See roles/system/tasks/
@@ -15,7 +19,7 @@
 - hosts: "{{ target | default('all') }}"
   become: yes
   tasks:
-    - import_tasks: roles/system/tasks/anthropic-org-watchdog.yml
+    - import_role:
+        name: system
+        tasks_from: anthropic-org-watchdog
       tags: anthropic-org-watchdog
-  handlers:
-    - import_tasks: roles/system/handlers/main.yml
