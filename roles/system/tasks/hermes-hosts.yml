@@ -5,19 +5,25 @@
 # no-shell, key-only *access* account for remote admin/orchestration.
 #
 # These accounts get NO sudo — the only privileged step is the one-time
-# apt bootstrap of shared system packages (git, nodejs/npm, ripgrep,
-# build-essential, chromium runtime deps for Playwright), done once at
-# the root/become level for all accounts, not per-user. The Hermes
-# install itself runs entirely inside each user's own $HOME via
-# become_user, no elevated rights required at runtime.
+# apt bootstrap of shared system packages (git, ripgrep, build-essential,
+# chromium runtime deps for Playwright), done once at the root/become
+# level for all accounts, not per-user. The Hermes install itself runs
+# entirely inside each user's own $HOME via become_user, no elevated
+# rights required at runtime.
+#
+# Deliberately NOT installing nodejs/npm from apt: Debian's apt nodejs
+# package is far below the v22+ (targeting v26 LTS) Hermes requires, so
+# the install.sh installer's own check_node() always detects it as too
+# old and downloads/manages its own Node.js binary under
+# $HERMES_HOME/node instead, bypassing apt's nodejs entirely. The apt
+# package was dead weight that never actually got used — removed to
+# avoid confusion for future readers of this playbook.
 
 - name: Install shared system packages required by Hermes Agent
   apt:
     name:
       - git
       - curl
-      - nodejs
-      - npm
       - ripgrep
       - build-essential
       - python3-venv
