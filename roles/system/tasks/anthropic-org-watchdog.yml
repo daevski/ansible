@@ -43,7 +43,7 @@
 
 - name: Deploy shared org-id watchdog script
   template:
-    src: anthropic-org-watchdog.sh.j2
+    src: "{{ playbook_dir }}/roles/system/templates/anthropic-org-watchdog.sh.j2"
     dest: /usr/local/bin/anthropic-org-watchdog.sh
     owner: root
     group: root
@@ -51,7 +51,7 @@
 
 - name: Template org-id watchdog config
   template:
-    src: anthropic-org-watchdog.conf.j2
+    src: "{{ playbook_dir }}/roles/system/templates/anthropic-org-watchdog.conf.j2"
     dest: /etc/anthropic-org-watchdog.conf
     owner: root
     group: root
@@ -59,7 +59,7 @@
 
 - name: Install anthropic-org-watchdog systemd service (root, system-level)
   copy:
-    src: anthropic-org-watchdog.service
+    src: "{{ playbook_dir }}/roles/system/files/anthropic-org-watchdog.service"
     dest: /etc/systemd/system/anthropic-org-watchdog.service
     owner: root
     group: root
@@ -68,7 +68,7 @@
 
 - name: Install anthropic-org-watchdog systemd timer (root, system-level)
   template:
-    src: anthropic-org-watchdog.timer.j2
+    src: "{{ playbook_dir }}/roles/system/templates/anthropic-org-watchdog.timer.j2"
     dest: /etc/systemd/system/anthropic-org-watchdog.timer
     owner: root
     group: root
