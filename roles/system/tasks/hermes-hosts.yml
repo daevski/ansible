@@ -58,13 +58,3 @@
   command: "loginctl enable-linger {{ item }}"
   loop: "{{ hermes_host_accounts }}"
   changed_when: false
-
-# NOTE: does NOT chain into anthropic-org-watchdog.yml here. Hermes Agent
-# itself (the `hermes` CLI these accounts need) is installed via an
-# interactive OAuth login that isn't automatable -- so at the point this
-# task file finishes, the accounts exist but have no hermes CLI yet.
-# anthropic-org-watchdog.yml's cron-registration step depends on that CLI
-# being present, and is idempotency-guarded so it's safe to run standalone
-# any number of times. Run it as a separate step after the manual Hermes
-# install/login is done:
-#   ansible-playbook -i inventory/hosts anthropic-org-watchdog.yml --limit <host>

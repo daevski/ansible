@@ -1,8 +1,17 @@
 ---
 # Standalone playbook to provision the hermes-1/hermes-2 login accounts
 # that will each host an independent Hermes Agent instance on a target
-# host (e.g. bigbox). Imports the task file + handlers directly so it
-# runs in isolation without pulling in the rest of the system role.
+# host (e.g. bigbox), plus the anthropic-org-watchdog systemd timer that
+# monitors them. Imports both task files + handlers directly so it runs
+# in isolation without pulling in the rest of the system role.
+#
+# The watchdog step is safe to run before Hermes Agent itself is
+# installed/logged in on the target accounts (that's a manual OAuth step,
+# not automatable): it deploys the systemd units and config regardless,
+# and just falls back to journal-only logging until a working `hermes`
+# CLI exists at the configured sender account's path. Re-running this
+# playbook after finishing that manual install picks up alert delivery
+# automatically -- no separate step required.
 #
 # Usage:
 #   ansible-playbook -i inventory/hosts hermes-hosts.yml --limit bigbox
@@ -11,5 +20,7 @@
   tasks:
     - import_tasks: roles/system/tasks/hermes-hosts.yml
       tags: hermes-hosts
+    - import_tasks: roles/system/tasks/anthropic-org-watchdog.yml
+      tags: anthropic-org-watchdog
   handlers:
     - import_tasks: roles/system/handlers/main.yml
