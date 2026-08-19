@@ -1,0 +1,112 @@
+#!/bin/bash
+# Standalone Anthropic-org watchdog. Deliberately outside any Hermes
+# Agent's own scheduler -- runs as a plain root systemd timer so it keeps
+# working even if a Hermes gateway/scheduler on this box is hung, crashed,
+# or itself misconfigured. Runs as root so it can read every Hermes
+# account's .env directly with no per-user sudoers entries required (some
+# Hermes host accounts, e.g. hermes-1/hermes-2, intentionally have no sudo
+# at all).
+#
+# Scans every /home/*/.hermes/.env on this box, probes the Anthropic API
+# with each ANTHROPIC_TOKEN found, and compares the returned org_id
+# against the expected personal org id. Silent when everything matches.
+# On any mismatch/invalid-token, delivers one alert via `hermes send`
+# (no LLM call, no running gateway required -- just reuses that account's
+# stored platform credentials) using whichever Hermes account's CLI is
+# configured as the sender (HERMES_SEND_BIN below, ansible-templated).
+#
+# Expected org id lives in /etc/anthropic-org-watchdog.conf as
+# PERSONAL_ORG_ID=<uuid>. To update it (new personal account, migration):
+#   sudo tee /etc/anthropic-org-watchdog.conf <<< 'PERSONAL_ORG_ID=<new-uuid>'
+# (Ansible-managed -- also update anthropic_personal_org_id in
+# group_vars/all.yml so a future playbook run doesn't revert it.)
+# Takes effect on the next timer run, no restart needed.
+set -uo pipefail
+
+CONF_FILE="/etc/anthropic-org-watchdog.conf"
+HERMES_SEND_BIN="/home/{{ anthropic_watchdog_sender_account }}/.local/bin/hermes"
+
+if [ -f "$CONF_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$CONF_FILE"
+fi
+
+send_alert() {
+    local msg="$1"
+    if [ -n "${HERMES_SEND_BIN:-}" ] && [ -x "$HERMES_SEND_BIN" ]; then
+        "$HERMES_SEND_BIN" send --to telegram "$msg" >/dev/null 2>&1
+    fi
+    # Always also echo to stdout/journal so `journalctl -u anthropic-org-watchdog`
+    # has a record even if hermes send fails or isn't configured.
+    echo "$msg"
+}
+
+if [ -z "${PERSONAL_ORG_ID:-}" ]; then
+    send_alert "⚠️ ANTHROPIC WATCHDOG ($(hostname)): $CONF_FILE is missing or has no PERSONAL_ORG_ID set -- can't verify anything. Set it with:
+sudo tee $CONF_FILE <<< 'PERSONAL_ORG_ID=<your-personal-org-uuid>'"
+    exit 0
+fi
+
+ALERTS=""
+
+check_env_file() {
+    local user="$1"
+    local env_file="$2"
+
+    local key
+    key=$(cat "$env_file" 2>/dev/null | grep '^ANTHROPIC_TOKEN=' | head -1 | cut -d= -f2-)
+
+    if [ -z "${key:-}" ]; then
+        return
+    fi
+
+    local headers
+    headers=$(mktemp)
+    local http_code
+    http_code=$(curl -s -o /dev/null -D "$headers" -w "%{http_code}" \
+      https://api.anthropic.com/v1/messages \
+      -H "Authorization: Bearer $key" \
+      -H "anthropic-version: 2023-06-01" \
+      -H "anthropic-beta: oauth-2025-04-20" \
+      -H "content-type: application/json" \
+      -d '{"model":"org-id-probe-invalid-model","max_tokens":1,"messages":[{"role":"user","content":"x"}]}' \
+      --max-time 15) || true
+
+    local org_id
+    org_id=$(grep -i '^anthropic-organization-id:' "$headers" 2>/dev/null | awk '{print $2}' | tr -d '\r')
+    rm -f "$headers"
+
+    if [ "$http_code" = "401" ]; then
+        ALERTS="${ALERTS}⚠️ [$user] ANTHROPIC_TOKEN in $env_file is invalid/expired (401). That instance's LLM calls may be failing.
+"
+        return
+    fi
+
+    if [ -z "$org_id" ]; then
+        ALERTS="${ALERTS}⚠️ [$user] could not determine org id for $env_file (HTTP $http_code, no org header). Check manually.
+"
+        return
+    fi
+
+    if [ "$org_id" != "$PERSONAL_ORG_ID" ]; then
+        ALERTS="${ALERTS}🚨 [$user] $env_file is NOT on the expected personal org! Active org_id=$org_id (expected $PERSONAL_ORG_ID). Looks like an enterprise/work account is wired in -- fix ANTHROPIC_TOKEN in that file and restart that instance's gateway.
+"
+    fi
+}
+
+for d in /home/*/; do
+    u=$(basename "$d")
+    env_file="${d}.hermes/.env"
+    [ -f "$env_file" ] && check_env_file "$u" "$env_file"
+done
+
+if [ -n "$ALERTS" ]; then
+    HOW_TO_FIX="If your personal org id changed (new account, migration, etc), update it with:
+  sudo tee $CONF_FILE <<< 'PERSONAL_ORG_ID=<new-org-uuid>'
+Takes effect on the next timer run automatically -- no restart needed.
+(Ansible-managed -- also update anthropic_personal_org_id in group_vars/all.yml
+in the ansible repo so a future playbook run doesn't revert it.)"
+    send_alert "$(printf '%s\n%s' "$ALERTS" "$HOW_TO_FIX")"
+fi
+
+exit 0

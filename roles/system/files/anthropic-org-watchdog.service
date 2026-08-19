@@ -1,0 +1,8 @@
+[Unit]
+Description=Anthropic org-id watchdog — alert if wrong Anthropic account is wired in
+# Deliberately not After=/Requires= any Hermes service: must keep working
+# even if a Hermes gateway on this box is down or misconfigured.
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/anthropic-org-watchdog.sh

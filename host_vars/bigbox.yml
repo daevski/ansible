@@ -4,3 +4,9 @@ ansible_user: david
 hermes_host_accounts:
   - hermes-1
   - hermes-2
+
+# Which Hermes account's CLI sends anthropic-org-watchdog alerts (via
+# hermes send). Any account with a working messaging platform connection
+# works -- delivery does not depend on that account's own credential
+# being the one under test.
+anthropic_watchdog_sender_account: hermes-1
