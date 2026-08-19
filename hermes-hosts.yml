@@ -1,0 +1,15 @@
+---
+# Standalone playbook to provision the hermes-1/hermes-2 login accounts
+# that will each host an independent Hermes Agent instance on a target
+# host (e.g. bigbox). Imports the task file + handlers directly so it
+# runs in isolation without pulling in the rest of the system role.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts hermes-hosts.yml --limit bigbox
+- hosts: "{{ target | default('all') }}"
+  become: yes
+  tasks:
+    - import_tasks: roles/system/tasks/hermes-hosts.yml
+      tags: hermes-hosts
+  handlers:
+    - import_tasks: roles/system/handlers/main.yml

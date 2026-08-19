@@ -19,3 +19,5 @@ user_fonts:
 
 wallpaper_url: https://i.imgur.com/xeYkH88.jpeg
 wallpaper_dest: /usr/share/backgrounds/wallpaper.jpeg
+
+ssh_service_name: sshd

@@ -1,0 +1,54 @@
+---
+# Provisions N real login-shell accounts to each host an independent
+# Hermes Agent instance (e.g. hermes-1 = LiVoro, hermes-2 = Val).
+# Distinct from hermes-remote.yml, which provisions a single restricted,
+# no-shell, key-only *access* account for remote admin/orchestration.
+#
+# These accounts get NO sudo — the only privileged step is the one-time
+# apt bootstrap of shared system packages (git, nodejs/npm, ripgrep,
+# build-essential, chromium runtime deps for Playwright), done once at
+# the root/become level for all accounts, not per-user. The Hermes
+# install itself runs entirely inside each user's own $HOME via
+# become_user, no elevated rights required at runtime.
+
+- name: Install shared system packages required by Hermes Agent
+  apt:
+    name:
+      - git
+      - curl
+      - nodejs
+      - npm
+      - ripgrep
+      - build-essential
+      - python3-venv
+      - python3-pip
+      # Playwright/Chromium runtime deps (Debian/Ubuntu apt names)
+      - libnss3
+      - libatk1.0-0
+      - libatk-bridge2.0-0
+      - libcups2
+      - libdrm2
+      - libxkbcommon0
+      - libxcomposite1
+      - libxdamage1
+      - libxfixes3
+      - libxrandr2
+      - libgbm1
+      - libasound2
+    state: present
+    update_cache: yes
+  register: apt_install_result
+
+- name: Create Hermes host accounts
+  user:
+    name: "{{ item }}"
+    shell: /bin/bash
+    create_home: yes
+    groups: []
+    password_lock: yes
+  loop: "{{ hermes_host_accounts }}"
+
+- name: Enable lingering so each account's systemd --user services survive logout
+  command: "loginctl enable-linger {{ item }}"
+  loop: "{{ hermes_host_accounts }}"
+  changed_when: false

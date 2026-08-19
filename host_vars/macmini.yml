@@ -1,0 +1,3 @@
+---
+ssh_service_name: ssh
+ansible_user: debian

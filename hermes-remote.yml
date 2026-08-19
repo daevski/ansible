@@ -1,0 +1,16 @@
+---
+# Standalone playbook to provision the hermes-remote low-priv account
+# on a target host. Imports the existing task file from the system
+# role (single source of truth) plus its handlers file directly, so
+# it runs independently without pulling in the rest of that role
+# (packages, dotfiles, fonts, etc.).
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts hermes-remote.yml --limit macmini --ask-pass --ask-become-pass
+- hosts: "{{ target | default('all') }}"
+  become: yes
+  tasks:
+    - import_tasks: roles/system/tasks/hermes-remote.yml
+      tags: hermes-remote
+  handlers:
+    - import_tasks: roles/system/handlers/main.yml

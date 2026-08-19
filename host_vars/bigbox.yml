@@ -1,0 +1,6 @@
+---
+ssh_service_name: ssh
+ansible_user: david
+hermes_host_accounts:
+  - hermes-1
+  - hermes-2

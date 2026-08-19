@@ -1,3 +1,5 @@
 [all]
-desktop ansible_connection=local
-laptop ansible_connection=local
+desktop ansible_host=192.168.0.127 ansible_connection=local
+laptop ansible_host=192.168.0.32 ansible_connection=local
+macmini ansible_host=192.168.0.128 ansible_user=debian
+bigbox ansible_host=192.168.0.173 ansible_user=david
